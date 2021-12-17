@@ -1,3 +1,21 @@
+---
+fontfamily: helvet
+header-includes:
+  - \renewcommand{\familydefault}{\sfdefault}
+geometry: margin=2cm
+documentclass: extarticle
+<!-- fontsize: 14pt -->
+---
+
+# Projekt bazy danych "SouthWind" do restauracji
+
+## Autorzy
+
+- Łukasz Pawlak
+- Jakub Stępień
+- Piotr Witek
+
+
 # Wymagania funkcjonalne
 
 ## Wymagania ze strony restuaracji
@@ -6,18 +24,8 @@
 
 ### Potrawy
 
-- dodanie nowej kategorii potraw
 - dodanie nowej potrawy do bazy wszystkich potraw
-- wycofanie potrawy z bazy wszystkich potraw
-- dana potrawa jest oznaczana jako wycofana
-- zwracanie dań należących do danej kategorii (tylko z obecnego menu `?lub z bazy wszystkich potraw?`)
-
-### Półprodukty
-
-- dodanie nowego półproduktu
-- dodanie nowej kategorii półproduktu
-- aktualizacja stanu magazynowego danego półproduktu
-- zwracanie stanu magazynowego półproduktów (wszystkich lub tych, których stan magazynowy jest poniżej ilości minimalnej)
+- dana potrawa jest oznaczana jako niedostępna
 
 #### Owoce morza
 
@@ -25,26 +33,20 @@
 - czy jest odpowiedni dzień
   -  W dniach czwartek-piątek-sobota istnieje możliwość wcześniejszego zamówienia dań zawierających owoce morza.
       Z uwagi na indywidualny import takie zamówienie winno być złożone maksymalnie do poniedziałku
-      poprzedzającego zamówienie. - `czyli można tylko z tygodniowym wyprzedzeniem ???`
+      poprzedzającego zamówienie.
 
 ### Menu
 
 - dodanie potrawy do menu
-    - przy próbie dodania potrawy do menu sprawdzane jest czy potrawa nie znajduje się obecnie w menu (data wycofania pusta) oraz czy wycofano potrawę co najmniej 2 tygodnie wcześniej
+    - przy próbie dodania potrawy do menu sprawdzane jest czy potrawa nie znajduje się obecnie w menu oraz czy wycofano potrawę co najmniej 2 tygodnie wcześniej
 - wycofanie potrawy z menu
     - data wycofania potrawy ustawiana jest na aktualną
-- zwracanie listy potraw w obecnym menu (w całości lub tylko dostępne potrawy)
-    - zwracana jest lista pozycji menu, które mają pustą datę wycofania
-    - ` ?w przypadku tylko dostępnych potraw, zwracane są tylko potrawy które nie
-    zawierają półproduktów, których stan magazynowy jest poniżej wymaganego do
-    przygotowania potrawy? `
-    - ` ?jeżeli potrawa zawiera owoce morza, a pozostałe składniki nie będące owocami
-    morza są dostępne, to również jest zwracana - chyba tak będzie najprościej - alternatywa to dawanie wiecznej gotowości i dodawanie owoców morza i składnków do tych dań osobno? `
+- zwracanie listy potraw w obecnym menu
+    - zwracana jest lista pozycji menu, które mają datę pustą lub większą niż dzisiejsza
 - informowanie o konieczności zmian w menu
     - jeśli liczba pozycji menu, których data dodania do menu jest mniejsza lub równa od
     obecnej daty pomniejszonej o 14 dni zwracana jest informacja o konieczności
     zmiany menu
-    - ` ?w przypadku nie zmienienia starych dań, zmienione zostaną dania o najstarszej dacie dodania do menu? `
 
 ### Rezerwacje
 
@@ -72,19 +74,16 @@
 
 ### Zamówienia
 
-- zamówienie może być utworzone dla klienta zarejestrowanego w systemie lub dla klienta anonimowego
+- zamówienie może być utworzone dla klienta zarejestrowanego w systemie
     do bazy zamówień dodawane jest nowe zamówienie zawierające wybrane z
     obecnego menu potrawy, obecną datę jako datę zamówienia, jeżeli zamówienie jest
     na wynos to zawiera także datę odbioru, jeżeli zamówienie jest na miejscu to wtedy
-    zawiera także stolik,
+    zawiera także stolik
 - jeśli zamówienie obejmuje potrawy zawierające owoce morza, to data realizacji
     zamówienia może wypadać tylko w czwartek, piątek lub sobotę, przy czym data
     zamówienia musi być najpóźniej poniedziałkiem poprzedzającym datę realizacji
     (czyli datę rezerwacji dla zamówień na miejscu lub datę odbioru dla zamówień na
     wynos)
-- zapisanie informacji o rabacie przyznanym danemu klientowi
-- obliczenie rabatu dla danego klienta w trakcie składania zamówienia
-- zmiana statusu opłacenia zamówienia
 
 ### Rabaty
 
@@ -95,6 +94,9 @@
   - Usuwanie rabatu `typ 2` po określonym czasie (D1)
 - Trigger na dodanie zamówienia (ilość zamówień `typ 1` / kwota `typ 2`)
 - Zdecydowanie która zniżka jest ważniejsza w hierarchii i wybranie jej
+- zapisanie informacji o rabacie przyznanym danemu klientowi
+- obliczenie rabatu dla danego klienta w trakcie składania zamówienia
+- zmiana statusu opłacenia zamówienia
 
 ### Raporty
 
@@ -120,12 +122,10 @@
     - jeżeli klientem jest firma ma możliwość złożenia rezerwacji imiennie lub na firme,
     - w przypadku rezerwacji imiennej przez firmę dodawane są imiona i nazwiska osób
     - w przypadku rezerwacji przez klienta indywidualnego dodawane jest zamówienie
-    - rezerwacja musi być potwierdzona przez pracownika restauracji `(?pracownik wybiera stolik przypisany do rezerwacji?)`
+    - rezerwacja musi być potwierdzona przez pracownika restauracji
     - jeśli pracownik odrzuci rezerwacje usuwane jest zamówienie z nią powiązane
 - składanie zamówień na wynos
-    - klient wprowadza wszystkie dane wymagane do złożenia zamówienia, wybiera potrawy z obecnie dostępnego menu; `(?jeżeli klienta nie ma w bazie to jest do niej automatycznie dodawany?)`
+    - klient wprowadza wszystkie dane wymagane do złożenia zamówienia, wybiera potrawy z obecnie dostępnego menu
 - anulowanie rezerwacji
     - rezerwacja zostaje wyszukana na podstawie jej `PrimaryKey` a następnie jej status zostaje zmieniony na `anulowana przez klienta`.
 - `?forma rozliczenia, gdzy kupuje firma?`
-
-`(?co to jest catering (1 mention w pliku)?)`
