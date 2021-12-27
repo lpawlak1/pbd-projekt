@@ -1,12 +1,3 @@
----
-fontfamily: helvet
-header-includes:
-  - \renewcommand{\familydefault}{\sfdefault}
-geometry: margin=2cm
-documentclass: extarticle
-<!-- fontsize: 14pt -->
----
-
 # Projekt bazy danych "SouthWind" do restauracji
 
 ## Autorzy
@@ -14,7 +5,6 @@ documentclass: extarticle
 - Łukasz Pawlak
 - Jakub Stępień
 - Piotr Witek
-
 
 # Wymagania funkcjonalne
 

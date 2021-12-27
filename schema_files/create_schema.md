@@ -3,8 +3,10 @@
 -- Table: City
 CREATE TABLE City
 (
-    CityID   int           NOT NULL,
-    CityName nvarchar(255) NULL UNIQUE,
+    CityID    int           NOT NULL IDENTITY (1,1),
+    CityName  nvarchar(255) NULL,
+    IsActive  bit           NOT NULL default 1,
+    CountryID int           NOT NULL,
     CONSTRAINT City_pk PRIMARY KEY (CityID)
 );
 
@@ -12,7 +14,7 @@ CREATE TABLE City
 CREATE TABLE Company
 (
     CustomerID  int NOT NULL,
-    NIP         int NOT NULL UNIQUE,
+    NIP         int NOT NULL UNIQUE CHECK(NIP LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
     REGON       int NULL,
     KRS         int NULL,
     CompanyName int NOT NULL UNIQUE,
@@ -22,29 +24,28 @@ CREATE TABLE Company
 -- Table: Country
 CREATE TABLE Country
 (
-    CountryID   int           NOT NULL,
+    CountryID   int           NOT NULL IDENTITY (1,1),
     CountryName nvarchar(255) NOT NULL UNIQUE,
+    IsActive    bit           NOT NULL,
     CONSTRAINT Country_pk PRIMARY KEY (CountryID)
 );
 
 -- Table: Customer
 CREATE TABLE Customer
 (
-    CustomerID int          NOT NULL,
-    Email      nvarchar(50) NOT NULL UNIQUE,
-    Phone      nvarchar(50) NULL,
-    CountryID  int          NOT NULL,
+    CustomerID int          NOT NULL IDENTITY (1,1),
+    Email      nvarchar(50) NOT NULL UNIQUE CHECK(EMAIL LIKE N'%[@]%[.]%'),
+    Phone      nvarchar(50) NULL CHECK(Phone LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
     CityID     int          NOT NULL,
     Address    nvarchar(50) NOT NULL,
-    PostalCode nvarchar(50) NOT NULL,
-    CONSTRAINT Customer_ak_1 UNIQUE (CityID, CountryID),
+    PostalCode nvarchar(50) NOT NULL CHECK(PostalCode LIKE '[0-9][0-9]-[0-9][0-9][0-9]'),
     CONSTRAINT Customer_pk PRIMARY KEY (CustomerID)
 );
 
 -- Table: Discount
 CREATE TABLE Discount
 (
-    DiscountID int           NOT NULL,
+    DiscountID int           NOT NULL IDENTITY (1,1),
     Multiplier DECIMAL(3, 2) NOT NULL CHECK (Multiplier >= 0 and Multiplier <= 1),
     CONSTRAINT Discount_pk PRIMARY KEY (DiscountID)
 );
@@ -63,7 +64,7 @@ CREATE TABLE DiscountDetails
 -- Table: Dish
 CREATE TABLE Dish
 (
-    DishID      int           NOT NULL,
+    DishID      int           NOT NULL IDENTITY (1,1),
     Name        nvarchar(255) NOT NULL,
     IsSeafood   bit           NOT NULL,
     Price       money         NOT NULL check (Price > 0),
@@ -71,22 +72,13 @@ CREATE TABLE Dish
     CONSTRAINT Dish_pk PRIMARY KEY (DishID)
 );
 
--- Table: DurationTime
-CREATE TABLE DurationTime
-(
-    DurationTimeID int  NOT NULL,
-    TimePeriod     time NOT NULL default '1:00:0.0',
-    CONSTRAINT DurationTime_pk PRIMARY KEY (DurationTimeID)
-);
-
 -- Table: Employee
 CREATE TABLE Employee
 (
-    EmployeeID        int          NOT NULL,
+    EmployeeID        int          NOT NULL IDENTITY (1,1),
     CustomerID        int          NOT NULL,
     EmployeeFirstName nvarchar(50) NOT NULL,
     EmployeeLastName  nvarchar(50) NOT NULL,
-    CONSTRAINT Employee_ak_1 UNIQUE (CustomerID),
     CONSTRAINT Employee_pk PRIMARY KEY (EmployeeID)
 );
 
@@ -110,37 +102,42 @@ CREATE TABLE IndividualCustomer
 -- Table: Invoice
 CREATE TABLE Invoice
 (
-    InvoiceID       int   NOT NULL,
-    InvoiceSum      money NOT NULL default 0,
-    DueDate         date  NOT NULL,
-    CustomerID      int   NOT NULL,
-    PaymentStatusID int   NOT NULL,
+    InvoiceID       int          NOT NULL IDENTITY (1,1),
+    InvoiceNum      nvarchar(50) NOT NULL,
+    InvoiceDate     date         NOT NULL,
+    DueDate         date         NOT NULL,
+    CustomerID      int          NOT NULL,
+    PaymentStatusID int          NOT NULL,
+    CountryName     nvarchar(50) NOT NULL,
+    CityName        nvarchar(50) NOT NULL,
+    Address         nvarchar(50) NOT NULL,
+    PostalCode      nvarchar(50) NOT NULL,
     CONSTRAINT Invoice_pk PRIMARY KEY (InvoiceID)
 );
 
 -- Table: Menu
 CREATE TABLE Menu
 (
-    MenuID     int  NOT NULL,
+    MenuID     int  NOT NULL IDENTITY (1,1),
     DishID     int  NOT NULL,
     AddDate    date NOT NULL default getdate(),
-    RemoveDate date NULL,
+    RemoveDate date NULL CHECK(AddDate < RemoveDate OR RemoveDate IS NULL),
     CONSTRAINT Menu_pk PRIMARY KEY (MenuID)
 );
 
 -- Table: Order
 CREATE TABLE "Order"
 (
-    OrderID             int      NOT NULL,
+    OrderID             int      NOT NULL IDENTITY (1,1),
     CustomerID          int      NOT NULL,
     OrderDate           datetime NOT NULL default getdate(),
     OrderCompletionDate datetime NOT NULL check (OrderCompletionDate >= getdate()),
     OrderStatusID       int      NOT NULL default 1,
     PaymentStatusID     int      NOT NULL default 1,
     InvoiceID           int      NOT NULL,
-    DurationTimeID      int      NOT NULL default 1,
     OrderSum            money    NOT NULL check (OrderSum > 0),
-    CONSTRAINT Order_ak_1 UNIQUE (OrderStatusID, DurationTimeID),
+    DurationTime        time     NULL,
+    CONSTRAINT Order_ak_1 UNIQUE (OrderStatusID),
     CONSTRAINT Order_pk PRIMARY KEY (OrderID)
 );
 
@@ -157,7 +154,7 @@ CREATE TABLE OrderDetails
 -- Table: OrderStatus
 CREATE TABLE OrderStatus
 (
-    OrderStatusID   int          NOT NULL,
+    OrderStatusID   int          NOT NULL IDENTITY (1,1),
     OrderStatusName nvarchar(50) NOT NULL,
     CONSTRAINT OrderStatus_pk PRIMARY KEY (OrderStatusID)
 );
@@ -165,7 +162,7 @@ CREATE TABLE OrderStatus
 -- Table: PaymentStatus
 CREATE TABLE PaymentStatus
 (
-    PaymentStatusID   int          NOT NULL,
+    PaymentStatusID   int          NOT NULL IDENTITY (1,1),
     PaymentStatusName nvarchar(50) NOT NULL,
     CONSTRAINT PaymentStatus_pk PRIMARY KEY (PaymentStatusID)
 );
@@ -181,8 +178,8 @@ CREATE TABLE Reservation
 -- Table: Table
 CREATE TABLE "Table"
 (
-    TableID     int     NOT NULL,
-    ChairAmount int     NOT NULL check(ChairAmount >= 2),
+    TableID     int NOT NULL IDENTITY (1,1),
+    ChairAmount int NOT NULL check (ChairAmount >= 2),
     isActive    bit NOT NULL default 1,
     CONSTRAINT Table_pk PRIMARY KEY (TableID)
 );
@@ -199,12 +196,6 @@ ALTER TABLE Customer
     ADD CONSTRAINT Customer_City
         FOREIGN KEY (CityID)
             REFERENCES City (CityID);
-
--- Reference: Customer_Country (table: Customer)
-ALTER TABLE Customer
-    ADD CONSTRAINT Customer_Country
-        FOREIGN KEY (CountryID)
-            REFERENCES Country (CountryID);
 
 -- Reference: DiscountDetails_Customer (table: DiscountDetails)
 ALTER TABLE DiscountDetails
@@ -266,12 +257,6 @@ ALTER TABLE OrderDetails
         FOREIGN KEY (OrderID)
             REFERENCES "Order" (OrderID);
 
--- Reference: Order_DurationTime (table: Order)
-ALTER TABLE "Order"
-    ADD CONSTRAINT Order_DurationTime
-        FOREIGN KEY (DurationTimeID)
-            REFERENCES DurationTime (DurationTimeID);
-
 -- Reference: Order_EmployeeDetails (table: EmployeeDetails)
 ALTER TABLE EmployeeDetails
     ADD CONSTRAINT Order_EmployeeDetails
@@ -313,142 +298,4 @@ ALTER TABLE Reservation
     ADD CONSTRAINT Reservation_Table
         FOREIGN KEY (TableID)
             REFERENCES "Table" (TableID);
-
--- sequences
--- Sequence: City_seq
-CREATE SEQUENCE City_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: Company_seq
-CREATE SEQUENCE Company_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: Country_seq
-CREATE SEQUENCE Country_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: Customer_seq
-CREATE SEQUENCE Customer_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: Discount_seq
-CREATE SEQUENCE Discount_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: Dish_seq
-CREATE SEQUENCE Dish_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: DurationTime_seq
-CREATE SEQUENCE DurationTime_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: Employee_seq
-CREATE SEQUENCE Employee_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: IndividualCustomer_seq
-CREATE SEQUENCE IndividualCustomer_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: Invoice_seq
-CREATE SEQUENCE Invoice_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: Menu_seq
-CREATE SEQUENCE Menu_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: OrderStatus_seq
-CREATE SEQUENCE OrderStatus_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: Order_seq
-CREATE SEQUENCE Order_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: PaymentStatus_seq
-CREATE SEQUENCE PaymentStatus_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- Sequence: Table_seq
-CREATE SEQUENCE Table_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    NO CYCLE
-    NO CACHE;
-
--- End of file.
 ```
